@@ -4,6 +4,8 @@
 
 Entity::Entity(shared_ptr<Texture2D> texture)
 {
+    m_isAlive = true;
+    
     m_texture = texture;
 }
 
@@ -22,6 +24,11 @@ void Entity::draw(const Position& cameraPosition)
     Position delta(m_position.x - cameraPosition.x, m_position.y - cameraPosition.y);
 
     DrawTexture(*m_texture, center.x + delta.x, center.y + delta.y, WHITE);
+}
+
+void Entity::kill()
+{
+    m_isAlive = false;
 }
 
 const Rectangle Entity::getHitbox()

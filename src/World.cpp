@@ -1,6 +1,9 @@
 #include "World.h"
 #include "Player.h"
 #include <algorithm>
+#include <math.h>
+#include "ResourceManager.h"
+#include "Bullet.h"
 
 World::World(int width, int height)
 {
@@ -10,9 +13,49 @@ World::World(int width, int height)
 
 void World::update(const float &deltaTime)
 {
+    Player* player;
     for (auto&& entity : m_entities)
     {
-        if (entity->getType() == EntityType::Player) // TODO: Implement entities ID per world
+        if (entity->getType() == EntityType::Player)
+        {
+            player = static_cast<Player*>(entity.get());
+            break;
+        }
+    }
+
+    if (IsKeyPressed(KEY_SPACE))
+    {
+        Vector2 mousePos = GetMousePosition(); // Position de la souris
+        Vector2 startPos = { static_cast<float>(player->getPosition().x), static_cast<float>(player->getPosition().y) };
+    
+        // Calcul de la direction normalisée
+        Vector2 direction = { mousePos.x - startPos.x, mousePos.y - startPos.y };
+        float length = sqrt(direction.x * direction.x + direction.y * direction.y);
+    
+        if (length > 0) { 
+            direction.x /= length;
+            direction.y /= length;
+        }
+    
+        float speed = 500.0f; // Vitesse de la balle
+    
+        addEntity(std::make_unique<Bullet>(ResourceManager::getInstance().getTexture("bullet.png"), player->getPosition(), direction, speed));
+    }
+
+    vector<Entity*> killedEntities;
+
+    for (auto&& entity : m_entities)
+    {
+        if (!entity->isAlive())
+        {
+            killedEntities.push_back(entity.get());
+            continue;
+        }
+        
+        // TODO: Implement entities ID per world and Entity::getWorld
+        switch (entity->getType())
+        {
+        case EntityType::Player:
         {
             Player* player = static_cast<Player*>(entity.get());
 
@@ -25,9 +68,36 @@ void World::update(const float &deltaTime)
             }
 
             player->update(deltaTime, obstacles);
-            continue;
+            break;
         }
+        case EntityType::Projectile:
+        {
+            Bullet* bullet = static_cast<Bullet*>(entity.get());
+
+            // Reconstruire la liste des entitées sans le joueur
+            vector<Entity*> obstacles;
+            for (auto& obstacle : m_entities)
+            {
+                if (obstacle->getType() != EntityType::Obstacle) continue;
+                obstacles.push_back(obstacle.get());
+            }
+
+            bullet->update(deltaTime, obstacles);
+            break;
+        }
+        default:
+            break;
+        }
+
         entity->update(deltaTime);
+    }
+
+    for (auto entity : killedEntities)
+    {
+        auto itr = std::find_if(std::begin(m_entities), 
+            std::end(m_entities), 
+            [entity](auto &element) { return element.get() == entity; });
+        m_entities.erase(itr);
     }
 }
 

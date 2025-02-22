@@ -3,7 +3,7 @@
 #include <raylib.h>
 #include <vector>
 
-using std::vector, std::unique_ptr;
+using std::vector, std::unique_ptr, std::move;
 
 class World
 {

@@ -3,7 +3,6 @@
 
 Player::Player(shared_ptr<Texture2D> texture, const Position &position) : Entity(texture, position)
 {
-    m_cameraPosition = position;
 }
 
 void Player::update(const float &deltaTime, const vector<Entity *> &obstacles)

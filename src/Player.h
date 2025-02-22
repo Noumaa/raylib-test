@@ -10,12 +10,9 @@ public:
     Player(shared_ptr<Texture2D> texture, const Position& position);
     ~Player() = default;
 
-    virtual const EntityType getType() { return EntityType::Player; }
+    virtual const EntityType    getType() { return EntityType::Player; }
 
-    virtual void update(const float& deltaTime, const vector<Entity*>& obstacles);
+    virtual void                update(const float& deltaTime, const vector<Entity*>& obstacles);
 
-    const Position& getCameraPosition() { return m_position; }
-
-private:
-    Position m_cameraPosition;
+    const Position&             getCameraPosition() { return m_position; }
 };

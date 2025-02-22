@@ -19,6 +19,7 @@ struct Position
 enum class EntityType {
     Player,
     Obstacle,
+    Projectile,
 };
 
 class Entity
@@ -33,6 +34,10 @@ public:
     virtual void                update(const float& deltaTime);
     virtual void                draw(const Position& cameraPosition);
 
+    virtual void                kill();
+
+    const bool&                 isAlive() { return m_isAlive; }
+
     const Position&             getPosition() { return m_position; }
     const Texture2D&            getTexture() { return *m_texture; }
 
@@ -40,6 +45,8 @@ public:
     const Rectangle             getHitbox(Position position);
     
 protected:
+    bool                        m_isAlive;
+
     Position                    m_position;
     shared_ptr<Texture2D>       m_texture;
 };
