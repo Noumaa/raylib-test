@@ -12,7 +12,7 @@ public:
     ~World() = default;
 
     virtual void    update(const float& deltaTime);
-    virtual void    draw();
+    virtual void    draw(Camera2D& camera);
 
     void            addEntity(unique_ptr<Entity> entity);
     void            removeEntity(int entityId);

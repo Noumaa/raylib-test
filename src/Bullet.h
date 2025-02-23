@@ -7,7 +7,7 @@ using std::vector;
 class Bullet : public Entity
 {
 public:
-    Bullet(shared_ptr<Texture2D> texture, const Position& position, Vector2 direction, float speed);
+    Bullet(shared_ptr<Texture2D> texture, const Vector2& position, Vector2 direction, float speed);
     ~Bullet() = default;
 
     virtual const EntityType getType() { return EntityType::Projectile; }

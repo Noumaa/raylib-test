@@ -6,18 +6,6 @@ using std::shared_ptr;
 
 class World;
 
-struct Position
-{
-	int x;
-	int y;
-
-	Position() = default;
-	Position(int _x, int _y)
-        : x(_x), y(_y) {}
-
-    bool operator ==(Position position) { return position.x == this->x && position.y == this->y; }
-};
-
 enum class EntityType {
     Player,
     Obstacle,
@@ -28,13 +16,13 @@ class Entity
 {
 public:
     Entity(shared_ptr<Texture2D> texture);
-    Entity(shared_ptr<Texture2D> texture, const Position& position);
+    Entity(shared_ptr<Texture2D> texture, const Vector2& position);
     ~Entity() = default;
 
     virtual const EntityType    getType() { return EntityType::Obstacle; }
 
     virtual void                update(const float& deltaTime);
-    virtual void                draw(const Position& cameraPosition);
+    virtual void                draw(const Vector2& cameraPosition);
 
     virtual void                kill();
 
@@ -46,18 +34,18 @@ public:
     void                        setWorld(World* world) { m_world = world; }
     World*                      getWorld() { return m_world; }
 
-    const Position&             getPosition() { return m_position; }
+    const Vector2&              getPosition() { return m_position; }
     const Texture2D&            getTexture() { return *m_texture; }
 
     const Rectangle             getHitbox();
-    const Rectangle             getHitbox(Position position);
+    const Rectangle             getHitbox(Vector2 position);
     
 protected:
     int                         m_id;
     bool                        m_isAlive;
 
     World*                      m_world;
-    Position                    m_position;
+    Vector2                     m_position;
 
     shared_ptr<Texture2D>       m_texture;
 };

@@ -71,21 +71,21 @@ void World::update(const float &deltaTime)
     }
 }
 
-void World::draw()
+void World::draw(Camera2D &camera)
 {
-    Player* player = static_cast<Player*>(m_entities.at(m_playerId).get()); // Assuming the playerId is still referencing a Player entity
+    camera.target = getEntity(m_playerId)->getPosition();
 
-    const Position& cameraPosition = player->getCameraPosition();
+    BeginMode2D(camera);
 
     // Drawing world's background
-    Position center(GetRenderWidth() / 2, GetRenderHeight() / 2);
-    Position delta(-cameraPosition.x, -cameraPosition.y);
-    DrawRectangle(center.x + delta.x, center.y + delta.y, m_width, m_height, GREEN);
+    DrawRectangle(0, 0, m_width, m_height, GREEN);
 
     for (auto&& entity : m_entities)
     {
-        entity->draw(cameraPosition);
+        entity->draw(Vector2());
     }
+    
+    EndMode2D();
 }
 
 void World::addEntity(unique_ptr<Entity> entity)

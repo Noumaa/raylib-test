@@ -5,7 +5,7 @@
 #include <iostream>
 #include <math.h>
 
-Player::Player(shared_ptr<Texture2D> texture, const Position &position) : Entity(texture, position)
+Player::Player(shared_ptr<Texture2D> texture, const Vector2 &position) : Entity(texture, position)
 {
     m_world = nullptr;
 }
@@ -14,9 +14,9 @@ void Player::update(const float &deltaTime, const vector<Entity *> &obstacles)
 {
     Entity::update(deltaTime);
 
-    Position updatedPosition = m_position;
-    if (IsKeyDown(KEY_RIGHT))   updatedPosition.x++;
-    if (IsKeyDown(KEY_LEFT))    updatedPosition.x--;
+    Vector2 updatedPosition = m_position;
+    if (IsKeyDown(KEY_RIGHT) || IsKeyDown(KEY_D))   updatedPosition.x++;
+    if (IsKeyDown(KEY_LEFT) || IsKeyDown(KEY_A))    updatedPosition.x--;
 
     if (updatedPosition.x != m_position.x)
     {
@@ -31,8 +31,8 @@ void Player::update(const float &deltaTime, const vector<Entity *> &obstacles)
         }
     }
     
-    if (IsKeyDown(KEY_UP))      updatedPosition.y--;
-    if (IsKeyDown(KEY_DOWN))    updatedPosition.y++;
+    if (IsKeyDown(KEY_UP) || IsKeyDown(KEY_W))      updatedPosition.y--;
+    if (IsKeyDown(KEY_DOWN) || IsKeyDown(KEY_S))    updatedPosition.y++;
 
     if (updatedPosition.y != m_position.y)
     {
@@ -49,13 +49,13 @@ void Player::update(const float &deltaTime, const vector<Entity *> &obstacles)
 
     m_position = updatedPosition;
     
-
-    if (IsKeyPressed(KEY_SPACE))
+    if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
     {
-        Vector2 mousePos = GetMousePosition(); // Position de la souris
-        Vector2 startPos = { static_cast<float>(getPosition().x), static_cast<float>(getPosition().y) };
+        Vector2 mouseScreenPos = GetMousePosition();
+
+        Vector2 mousePos = GetScreenToWorld2D(GetMousePosition(), *m_camera);
+        Vector2 startPos = { m_position.x, m_position.y };
     
-        // Calcul de la direction normalisée
         Vector2 direction = { mousePos.x - startPos.x, mousePos.y - startPos.y };
         float length = sqrt(direction.x * direction.x + direction.y * direction.y);
     
@@ -64,7 +64,7 @@ void Player::update(const float &deltaTime, const vector<Entity *> &obstacles)
             direction.y /= length;
         }
     
-        float speed = 500.0f; // Vitesse de la balle
+        float speed = 1000;
     
         m_world->addEntity(std::make_unique<Bullet>(ResourceManager::getInstance().getTexture("bullet.png"), getPosition(), direction, speed));
     }

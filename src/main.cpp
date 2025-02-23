@@ -21,6 +21,8 @@ by Jeffery Myers is marked with CC0 1.0. To view a copy of this license, visit h
 
 std::unique_ptr<World> world;
 
+Camera2D camera;
+
 int main ()
 {
 	SearchAndSetResourceDir("resources");
@@ -28,30 +30,39 @@ int main ()
 
 	InitWindow(1280, 800, "Hello Raylib");
 	
+	// Creating the camera
+	camera = { 0 };
+	camera.offset = (Vector2){ GetScreenWidth()/2.0f, GetScreenHeight()/2.0f };
+	camera.rotation = 0.0f;
+	camera.zoom = 1.0f;
+	
 	// Creating the world
 	world = std::make_unique<World>(1000, 1000);
-
+	
 	// Creating the player
-	std::unique_ptr<Entity> player(new Player(
+	Player* player = new Player(
 		ResourceManager::getInstance().getTexture("angwy_wabbit_alpha.png"),
-		Position(
-			GetRandomValue(0, GetRenderWidth()),
-			GetRandomValue(0, GetRenderHeight())
-		)
-	));
+		{
+			world->getWidth() / 2,
+			world->getHeight() / 2
+		}
+	);
+
+	// Passing a camera pointer to the player
+	player->setCamera(&camera);
 
 	// Adding the player to the world
-	world->addEntity(std::move(player));
+	world->addEntity(std::unique_ptr<Player>(player));
 
 	// Add NPCs
 	for (size_t i = 0; i < 10; i++)
 	{
 		std::unique_ptr<Entity> entity(new Entity(
 			ResourceManager::getInstance().getTexture("wabbit_alpha.png"),
-			Position(
+			{
 				GetRandomValue(0, world->getWidth()),
 				GetRandomValue(0, world->getHeight())
-			)
+			}
 		));
 
 		world->addEntity(std::move(entity));
@@ -62,12 +73,13 @@ int main ()
 		float deltaTime = GetFrameTime();
 
 		world->update(deltaTime);
-
+	
 		BeginDrawing();
+
 		ClearBackground(BLACK);
 	
-		world->draw();
-		
+		world->draw(camera);
+
 		EndDrawing();
 	}
 

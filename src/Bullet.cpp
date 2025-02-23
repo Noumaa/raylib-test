@@ -1,7 +1,7 @@
 #include "Bullet.h"
 #include <iostream>
 
-Bullet::Bullet(shared_ptr<Texture2D> texture, const Position& position, Vector2 direction, float speed) : Entity(texture, position)
+Bullet::Bullet(shared_ptr<Texture2D> texture, const Vector2& position, Vector2 direction, float speed) : Entity(texture, position)
 {
     m_direction = direction;
     m_speed = speed;
