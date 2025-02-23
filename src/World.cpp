@@ -116,7 +116,6 @@ void World::removeEntity(int entityId)
     m_entities.erase(it);
 }
 
-// TODO: check valid id
 Entity *World::getEntity(int entityId)
 {
     auto it = find_if(m_entities.begin(), m_entities.end(), 
