@@ -2,45 +2,24 @@
 #include "Player.h"
 #include <algorithm>
 #include <math.h>
+#include <iostream>
 #include "ResourceManager.h"
 #include "Bullet.h"
+
+using std::find_if;
 
 World::World(int width, int height)
 {
     m_width = width;
     m_height = height;
+
+    m_nextEntityId = 0;
+    m_playerId = -1;
 }
 
 void World::update(const float &deltaTime)
 {
-    Player* player;
-    for (auto&& entity : m_entities)
-    {
-        if (entity->getType() == EntityType::Player)
-        {
-            player = static_cast<Player*>(entity.get());
-            break;
-        }
-    }
-
-    if (IsKeyPressed(KEY_SPACE))
-    {
-        Vector2 mousePos = GetMousePosition(); // Position de la souris
-        Vector2 startPos = { static_cast<float>(player->getPosition().x), static_cast<float>(player->getPosition().y) };
-    
-        // Calcul de la direction normalisée
-        Vector2 direction = { mousePos.x - startPos.x, mousePos.y - startPos.y };
-        float length = sqrt(direction.x * direction.x + direction.y * direction.y);
-    
-        if (length > 0) { 
-            direction.x /= length;
-            direction.y /= length;
-        }
-    
-        float speed = 500.0f; // Vitesse de la balle
-    
-        addEntity(std::make_unique<Bullet>(ResourceManager::getInstance().getTexture("bullet.png"), player->getPosition(), direction, speed));
-    }
+    Player* player = static_cast<Player*>(m_entities.at(m_playerId).get()); // Assuming the playerId is still referencing a Player entity
 
     vector<Entity*> killedEntities;
 
@@ -52,18 +31,14 @@ void World::update(const float &deltaTime)
             continue;
         }
         
-        // TODO: Implement entities ID per world and Entity::getWorld
         switch (entity->getType())
         {
         case EntityType::Player:
         {
-            Player* player = static_cast<Player*>(entity.get());
-
-            // Reconstruire la liste des entitées sans le joueur
             vector<Entity*> obstacles;
             for (auto& obstacle : m_entities)
             {
-                if (obstacle->getType() == EntityType::Player) continue;
+                if (obstacle->getId() == m_playerId) continue;
                 obstacles.push_back(obstacle.get());
             }
 
@@ -74,7 +49,6 @@ void World::update(const float &deltaTime)
         {
             Bullet* bullet = static_cast<Bullet*>(entity.get());
 
-            // Reconstruire la liste des entitées sans le joueur
             vector<Entity*> obstacles;
             for (auto& obstacle : m_entities)
             {
@@ -86,38 +60,26 @@ void World::update(const float &deltaTime)
             break;
         }
         default:
+            entity->update(deltaTime);
             break;
         }
-
-        entity->update(deltaTime);
     }
 
     for (auto entity : killedEntities)
     {
-        auto itr = std::find_if(std::begin(m_entities), 
-            std::end(m_entities), 
-            [entity](auto &element) { return element.get() == entity; });
-        m_entities.erase(itr);
+        removeEntity(entity->getId());
     }
 }
 
 void World::draw()
 {
-    Player* player;
-    for (auto&& entity : m_entities)
-    {
-        if (entity->getType() == EntityType::Player)
-        {
-            player = static_cast<Player*>(entity.get());
-            break;
-        }
-    }
+    Player* player = static_cast<Player*>(m_entities.at(m_playerId).get()); // Assuming the playerId is still referencing a Player entity
 
     const Position& cameraPosition = player->getCameraPosition();
 
+    // Drawing world's background
     Position center(GetRenderWidth() / 2, GetRenderHeight() / 2);
     Position delta(-cameraPosition.x, -cameraPosition.y);
-
     DrawRectangle(center.x + delta.x, center.y + delta.y, m_width, m_height, GREEN);
 
     for (auto&& entity : m_entities)
@@ -128,5 +90,36 @@ void World::draw()
 
 void World::addEntity(unique_ptr<Entity> entity)
 {
+    int nextEntityId = m_nextEntityId;
+
+    if (entity->getType() == EntityType::Player)
+    {
+        if (m_playerId != -1)
+        {
+            std::cout << "This world already have a player, ID " << m_playerId << "\n";
+            return;
+        }
+        m_playerId = nextEntityId; // Assuming the code below will works
+    }
+
+    entity->setId(nextEntityId);
+    entity->setWorld(this);
     m_entities.push_back(std::move(entity));
+    
+    m_nextEntityId++;
+}
+
+void World::removeEntity(int entityId)
+{
+    auto it = find_if(m_entities.begin(), m_entities.end(), 
+        [entityId](auto &entity) { return entity->getId() == entityId; });
+    m_entities.erase(it);
+}
+
+// TODO: check valid id
+Entity *World::getEntity(int entityId)
+{
+    auto it = find_if(m_entities.begin(), m_entities.end(), 
+        [entityId](auto &entity) { return entity->getId() == entityId; });
+    return it->get();
 }

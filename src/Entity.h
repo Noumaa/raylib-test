@@ -4,6 +4,8 @@
 
 using std::shared_ptr;
 
+class World;
+
 struct Position
 {
 	int x;
@@ -36,7 +38,13 @@ public:
 
     virtual void                kill();
 
+    void                        setId(int id) { m_id = id; }
+    const int&                  getId() { return m_id; }
+
     const bool&                 isAlive() { return m_isAlive; }
+
+    void                        setWorld(World* world) { m_world = world; }
+    World*                      getWorld() { return m_world; }
 
     const Position&             getPosition() { return m_position; }
     const Texture2D&            getTexture() { return *m_texture; }
@@ -45,8 +53,11 @@ public:
     const Rectangle             getHitbox(Position position);
     
 protected:
+    int                         m_id;
     bool                        m_isAlive;
 
+    World*                      m_world;
     Position                    m_position;
+
     shared_ptr<Texture2D>       m_texture;
 };
