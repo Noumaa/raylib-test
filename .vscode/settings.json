@@ -64,5 +64,6 @@
 		"variant": "cpp",
 		"iostream": "cpp",
 		"istream": "cpp"
-	}
+	},
+	"cmake.ignoreCMakeListsMissing": true
 }
